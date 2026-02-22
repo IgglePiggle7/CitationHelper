@@ -5,7 +5,7 @@ import os
 import requests
 import io
 from openai import OpenAI
-=
+
 # 获取环境变量 (API Keys)
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
