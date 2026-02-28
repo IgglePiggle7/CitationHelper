@@ -1,5 +1,5 @@
 ---
-title: Citation Fixer
+title: Citation Helper
 emoji: 🐨
 colorFrom: red
 colorTo: blue
