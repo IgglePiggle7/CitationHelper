@@ -214,8 +214,8 @@ theme = gr.themes.Soft(
     font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"]
 )
 
-with gr.Blocks(theme=theme, title="一站式学术写作神器") as demo:
-    gr.Markdown("<center><h1>🎓 一站式学术写作神器</h1></center>")
+with gr.Blocks(theme=theme, title="多功能学术文献引用助手") as demo:
+    gr.Markdown("<center><h1>🎓 多功能学术文献引用助手</h1></center>")
     gr.Markdown("<center>文献格式一键生成 | Word 引用序号自动重排</center>")
     
     with gr.Tabs():
