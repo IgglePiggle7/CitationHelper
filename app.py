@@ -12,14 +12,31 @@ LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 # 默认使用通义千问的 Base URL，如果用其他模型请在此修改或通过环境变量配置
 LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1") 
 
+# 辅助函数：将历史列表格式化为 Markdown 字符串
+def format_history(history_list):
+    if not history_list:
+        return "*暂无历史记录*"
+    
+    md_lines =[]
+    for i, item in enumerate(history_list):
+        md_lines.append(f"### 🕒 历史记录 {i+1}: {item['title']}")
+        md_lines.append(f"**目标格式**: {', '.join(item['styles'])}")
+        md_lines.append(item['content'])
+        md_lines.append("---")
+    return "\n\n".join(md_lines)
+
 # 功能一：文献引用生成器 (SerpApi + LLM)
-def generate_citation(paper_title, selected_styles):
+# 修改：增加了 history 参数，并返回 更新后的当前结果、更新后的状态列表、更新后的历史Markdown显示
+def generate_citation(paper_title, selected_styles, history):
+    if history is None:
+        history =[]
+        
     if not paper_title.strip():
-        return "❌ 请输入文献标题。"
+        return "❌ 请输入文献标题。", history, format_history(history)
     if not selected_styles:
-        return "❌ 请至少选择一种引用格式。"
+        return "❌ 请至少选择一种引用格式。", history, format_history(history)
     if not SERPAPI_KEY or not LLM_API_KEY:
-        return "❌ 系统未配置 API Key，请在 Hugging Face Secrets 中配置 SERPAPI_KEY 和 LLM_API_KEY。"
+        return "❌ 系统未配置 API Key，请在 Hugging Face Secrets 中配置 SERPAPI_KEY 和 LLM_API_KEY。", history, format_history(history)
 
     try:
         # 1. 第一步：在 Google Scholar 搜索文献，获取 result_id
@@ -32,9 +49,9 @@ def generate_citation(paper_title, selected_styles):
         }
         search_res = requests.get(search_url, params=search_params).json()
         
-        organic_results = search_res.get("organic_results", [])
+        organic_results = search_res.get("organic_results",[])
         if not organic_results:
-            return "⚠️ 未在 Google Scholar 找到该文献，请检查标题是否拼写正确。"
+            return "⚠️ 未在 Google Scholar 找到该文献，请检查标题是否拼写正确。", history, format_history(history)
             
         result_id = organic_results[0].get("result_id")
         real_title = organic_results[0].get("title", paper_title)
@@ -47,7 +64,7 @@ def generate_citation(paper_title, selected_styles):
         }
         cite_res = requests.get(search_url, params=cite_params).json()
         raw_citations = cite_res.get("citations", [])
-        links = cite_res.get("links", [])
+        links = cite_res.get("links",[])
         
         # 将原始数据转为字符串，喂给大模型
         raw_data_str = f"文献标题: {real_title}\n"
@@ -104,7 +121,6 @@ def generate_citation(paper_title, selected_styles):
 2. 如果原始数据缺失卷期号，尽力从 BibTeX 链接或其他格式中推断，若无则留空。
 3. 请直接输出结果，不要包含任何如“好的”、“为您生成”等闲聊废话。使用 Markdown 的 `### 格式名` 作为小标题。
 """
-        # 注意这里模型名：如果用阿里填 qwen-plus/qwen-max，如果用其他平台请换成对应模型名
         response = client.chat.completions.create(
             model="qwen-plus", 
             messages=[
@@ -114,10 +130,19 @@ def generate_citation(paper_title, selected_styles):
             temperature=0.1
         )
         
-        return response.choices[0].message.content
+        result = response.choices[0].message.content
+        
+        # 将新结果加入到历史记录中 (插入在最前面，保证最新记录在上)
+        history.insert(0, {
+            "title": real_title,
+            "styles": selected_styles,
+            "content": result
+        })
+        
+        return result, history, format_history(history)
 
     except Exception as e:
-        return f"❌ 运行过程中发生错误: {str(e)}"
+        return f"❌ 运行过程中发生错误: {str(e)}", history, format_history(history)
 
 # 功能二：Word 文献序号重排 (纯 Python 处理)
 def process_reorder(doc_file_path, ref_text):
@@ -135,7 +160,7 @@ def process_reorder(doc_file_path, ref_text):
                     s, e = range_str.split('-')
                     return [str(i) for i in range(int(s), int(e) + 1)]
                 return [range_str]
-            except: return []
+            except: return[]
 
         def compress_range(nums):
             if not nums: return ""
@@ -150,7 +175,7 @@ def process_reorder(doc_file_path, ref_text):
             return ", ".join(ranges)
 
         matches = re.findall(r'\[([\d\s,，\-–]+)\]', doc_text_str)
-        doc_order = []
+        doc_order =[]
         seen = set()
         for content in matches:
             for part in re.split(r'[,，]', content.replace(" ", "")):
@@ -167,7 +192,8 @@ def process_reorder(doc_file_path, ref_text):
                 oid = match.group(1) or match.group(2)
                 ref_map[oid] = match.group(3)
 
-        mapping, new_ref_list, current_idx = {}, [], 1
+        mapping, new_ref_list, current_idx = 1,[], 1
+        mapping = {}
         for old_id in doc_order:
             if old_id in ref_map:
                 mapping[old_id] = current_idx
@@ -181,7 +207,7 @@ def process_reorder(doc_file_path, ref_text):
 
         def replace_callback(match):
             parts = re.split(r'[,，]', match.group(1))
-            new_ids = []
+            new_ids =[]
             for part in parts:
                 for old_id in expand_range(part.strip()):
                     if old_id in mapping: new_ids.append(mapping[old_id])
@@ -207,7 +233,6 @@ def process_reorder(doc_file_path, ref_text):
         return None, f"❌ 处理出错: {str(e)}"
 
 # 网页界面 (Gradio UI)
-# 设置主题，让界面看起来更现代、专业
 theme = gr.themes.Soft(
     primary_hue="blue",
     neutral_hue="slate",
@@ -215,6 +240,9 @@ theme = gr.themes.Soft(
 )
 
 with gr.Blocks(theme=theme, title="多功能学术文献引用助手") as demo:
+    # 定义全局 Session 变量保存历史记录
+    history_state = gr.State([])
+    
     gr.Markdown("<center><h1>🎓 多功能学术文献引用助手</h1></center>")
     gr.Markdown("<center>文献格式一键生成 | Word 引用序号自动重排</center>")
     
@@ -229,16 +257,32 @@ with gr.Blocks(theme=theme, title="多功能学术文献引用助手") as demo:
                     paper_input = gr.Textbox(label="输入文献标题", placeholder="例如：Attention is all you need")
                     style_choices = gr.CheckboxGroup(
                         choices=["GB/T 7714-2015", "APA7", "MLA9", "IEEE", "Chicago", "BibTeX"],
-                        value=["GB/T 7714-2015", "APA7"], # 默认选中两项
+                        value=["GB/T 7714-2015", "APA7"], 
                         label="选择目标格式 (可多选)"
                     )
                     gen_btn = gr.Button("🚀 联网生成引用", variant="primary")
                     
                 with gr.Column(scale=1):
-                    gen_output = gr.Markdown(label="生成结果")
+                    gen_output = gr.Markdown(label="本次生成结果", value="*输入文献标题后在此查看生成结果...*")
+                    
+                    # 历史记录展示区
+                    with gr.Accordion("📚 历史浏览记录", open=False):
+                        history_output = gr.Markdown(value="*暂无历史记录*")
+                        clear_history_btn = gr.Button("🗑️ 清空历史记录", size="sm")
             
-            # 绑定生成按钮事件
-            gen_btn.click(fn=generate_citation, inputs=[paper_input, style_choices], outputs=gen_output)
+            # 绑定生成按钮事件 (新增传入和传出 history 状态)
+            gen_btn.click(
+                fn=generate_citation, 
+                inputs=[paper_input, style_choices, history_state], 
+                outputs=[gen_output, history_state, history_output]
+            )
+            
+            # 绑定清空历史事件
+            clear_history_btn.click(
+                fn=lambda: ([], "*暂无历史记录*"),
+                inputs=None,
+                outputs=[history_state, history_output]
+            )
 
         # -----------------------------
         # 标签页 2：Word 乱序重排
