@@ -7,7 +7,7 @@ SYSTEM_SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 
 # 默认的大模型请求地址与模型名称 (目前 HF 上免费的强大模型)
-DEFAULT_LLM_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1"
+DEFAULT_LLM_URL = "https://router.huggingface.co/v1"
 DEFAULT_LLM_MODEL = "Qwen/Qwen2.5-72B-Instruct"
 DEFAULT_LLM_KEY = HF_TOKEN
 
