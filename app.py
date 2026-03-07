@@ -32,7 +32,7 @@ with gr.Blocks(theme=theme, title="多功能学术文献引用助手") as demo:
                 with gr.Column(scale=1):
                     paper_input = gr.Textbox(label="输入文献标题", placeholder="例如：Attention is all you need")
                     style_choices = gr.CheckboxGroup(
-                        choices=["GB/T 7714-2015", "APA7", "MLA9", "IEEE", "Chicago", "BibTeX"],
+                        choices=["GB/T 7714-2015", "APA7", "MLA9", "IEEE", "Chicago"],
                         value=["GB/T 7714-2015", "APA7"], 
                         label="选择目标格式 (可多选)"
                     )
