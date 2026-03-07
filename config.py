@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+# 尝试加载本地的 .env 文件。
+# 如果是本地运行，会把 .env 里的 Key 读入环境变量；
+# 如果是 Hugging Face 线上，线上没有这个文件就会自动忽略，去读线上的 Secrets。
+load_dotenv()
 
 # SerpApi 配置 (系统默认额度)
 SYSTEM_SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")

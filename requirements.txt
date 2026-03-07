@@ -2,3 +2,4 @@ gradio
 python-docx
 requests
 openai
+python-dotenv
