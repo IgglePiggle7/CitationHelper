@@ -31,9 +31,9 @@ def get_citation_prompt(styles_str, raw_data_str):
    - 注意：作者名字首字母在前；文章名加双引号；期刊名斜体。
    - **作者规则**: 列出所有作者。如果作者人数极多(>6)，可列第一位 + "et al."，绝对不能截断中间的作者。
    - 作者格式: [1] J. K. Author, "Title," ... (名缩写在前，姓在后)。
-5. **Chicago (Bibliography)**:
+5. **Chicago**:
    - 格式：Author, First. "Title of Article." *Journal Title* Volume, no. Issue (Year): Pages.
-   - **作者规则**: 参考书目(Bibliography)中，列出多达 10 位作者；超过 10 位列出前 7 位 + "et al."。
+   - **作者规则**: 参考书目中，列出多达 10 位作者；超过 10 位列出前 7 位 + "et al."。
    
 【特殊数据处理】:
 如果输入元数据中的作者列表已经被截断（例如包含 "..." 或 "Horizontal ellipsis"），且无法获取完整名单：
