@@ -37,10 +37,21 @@ def get_citation_prompt(styles_str, raw_data_str):
 6. **BibTeX**:
    - 格式：使用标准的 @article 或 @inproceedings 代码块。
    - 要求：必须包含 title, author, journal (或 booktitle), volume, number, pages, year。
-   - 缩进规范，使用双引号或大括号包裹字段。
-   
+   - 如果原始数据中 volume 和 number 没直接标注，请从 `raw_data_str` 里的其他引用格式（如 GB/T 或 APA）中寻找类似 "30(2)" 或 "Vol. 30, No. 2" 的字样并提取。
+
+【BibTeX 输出参考范例】:
+```bibtex
+@article{{vaswani2017attention,
+  title={{Attention is all you need}},
+  author={{Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, Lukasz and Polosukhin, Illia}},
+  journal={{Advances in Neural Information Processing Systems}},
+  volume={{30}},
+  year={{2017}}
+}}
+```
+
 【特殊数据处理】:
-如果输入元数据中的作者列表已经被截断（例如包含 "..." 或 "Horizontal ellipsis"），且无法获取完整名单：
+- 如果输入元数据中的作者列表已经被截断（例如包含 "..." 或 "Horizontal ellipsis"），且无法获取完整名单：
 - GB/T 和 MLA: 请确保符合上述 "et al." 规则。
 - APA 和 IEEE: 列出所有已知作者，并在末尾保留 "et al." 以示严谨，不要生造名字。
 
