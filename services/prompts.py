@@ -34,6 +34,10 @@ def get_citation_prompt(styles_str, raw_data_str):
 5. **Chicago**:
    - 格式：Author, First. "Title of Article." *Journal Title* Volume, no. Issue (Year): Pages.
    - **作者规则**: 参考书目中，列出多达 10 位作者；超过 10 位列出前 7 位 + "et al."。
+6. **BibTeX**:
+   - 格式：使用标准的 @article 或 @inproceedings 代码块。
+   - 要求：必须包含 title, author, journal (或 booktitle), volume, number, pages, year。
+   - 缩进规范，使用双引号或大括号包裹字段。
    
 【特殊数据处理】:
 如果输入元数据中的作者列表已经被截断（例如包含 "..." 或 "Horizontal ellipsis"），且无法获取完整名单：
@@ -41,7 +45,7 @@ def get_citation_prompt(styles_str, raw_data_str):
 - APA 和 IEEE: 列出所有已知作者，并在末尾保留 "et al." 以示严谨，不要生造名字。
 
 【输出要求】:
-1. 严禁输出用户未选择的格式。
+1. 严禁输出用户未选择的格式，必须完整输出用户勾选的所有格式（{styles_str}），严禁遗漏。
 2. 如果原始数据缺失卷期号，尽力从 BibTeX 链接或其他格式中推断，若无则留空。
 3. 请直接输出结果，不要包含任何如“好的”、“为您生成”等闲聊废话。使用 Markdown 的 `### 格式名` 作为小标题。
 """
