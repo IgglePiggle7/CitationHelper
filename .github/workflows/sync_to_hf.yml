@@ -1,0 +1,25 @@
+name: Sync to Hugging Face Space
+
+on:
+  push:
+    branches: [main] # 当 main 分支有推送时触发
+  workflow_dispatch: # 允许你在 GitHub 网页上纯手动点击运行
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true # 如果你有大文件，这行极其重要
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          # 强制推送到 HF Space
+          git push https://__token__:$HF_TOKEN@huggingface.co/spaces/LLM-NLOL/CitationHelper main --force
