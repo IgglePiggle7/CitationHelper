@@ -34,7 +34,6 @@ license: mit
   - IEEE
   - Chicago (Bibliography)
   - BibTeX
-- **自带防刷爆机制 (BYOK)**：支持用户在前端“高级设置”中填入自己的 SerpApi Key 或 大模型 API Key，避免公共额度耗尽。
 - **会话历史记录**：在网页会话期间，自动保存并折叠展示你的历史生成记录。
 
 ### 📝 2. Word 引用乱序自动重排 (纯本地算法)
@@ -58,6 +57,7 @@ CITATIONHELPER/
 └── services/            # 核心业务逻辑层
     ├── citation.py      # SerpApi 网络检索与 LLM 生成逻辑
     └── document.py      # python-docx 文档解析与引用标号重排算法
+    └── prompts.py       # 大模型提示词模版
 ```
 
 ---
