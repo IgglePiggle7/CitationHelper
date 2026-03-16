@@ -2,6 +2,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+# Crossref 礼貌池邮箱配置
+CROSSREF_EMAIL = os.environ.get("CROSSREF_EMAIL", "")
+
 # SerpApi 配置 (系统默认额度)
 SYSTEM_SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")
 

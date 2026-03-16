@@ -3,7 +3,7 @@ import json
 import traceback
 from functools import lru_cache
 from openai import OpenAI
-from config import DEFAULT_LLM_KEY, DEFAULT_LLM_URL, DEFAULT_LLM_MODEL
+from config import DEFAULT_LLM_KEY, DEFAULT_LLM_URL, DEFAULT_LLM_MODEL, CROSSREF_EMAIL
 from utils import format_history
 from prompts import get_citation_prompt
 
@@ -18,7 +18,7 @@ def fetch_crossref_metadata(paper_title):
         "rows": 1 # 只取最匹配的第一条
     }
     # 模拟浏览器请求头，防止被墙
-    headers = {"User-Agent": "CitationHelperBot/1.0 (mailto:your_email@example.com)"}
+    headers = {"User-Agent": f"CitationHelperBot/1.0 (mailto:{CROSSREF_EMAIL})"}
     
     res = requests.get(url, params=params, headers=headers, timeout=10)
     res.raise_for_status()
