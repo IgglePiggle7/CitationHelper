@@ -5,7 +5,7 @@ from functools import lru_cache
 from openai import OpenAI
 from config import DEFAULT_LLM_KEY, DEFAULT_LLM_URL, DEFAULT_LLM_MODEL, CROSSREF_EMAIL
 from utils import format_history
-from prompts import get_citation_prompt
+from services.prompts import get_citation_prompt
 
 # 引入内存缓存：最近搜索过的 50 篇文献
 @lru_cache(maxsize=50)
