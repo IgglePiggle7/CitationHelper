@@ -10,7 +10,7 @@ from services.prompts import get_citation_prompt
 CITATION_CACHE = {}
 
 def get_best_crossref_match(paper_title):
-    """从 Crossref 获取前 5 个结果，并在本地进行精确标题匹配"""
+    """从 Crossref 获取前 5 个结果，按数据质量排序后进行精确标题匹配"""
     url = "https://api.crossref.org/works"
     params = {
         "query.title": paper_title, 
@@ -26,6 +26,25 @@ def get_best_crossref_match(paper_title):
     if not items:
         return None
         
+    # 核心优化：数据质量评分算法
+    # 过滤掉 Crossref 中的“补充材料(component)”或没有作者的残次品数据
+    def get_item_quality_score(item):
+        score = 0
+        # 1. 真正的论文必须有作者，无作者直接按废品处理
+        if "author" in item:
+            score += 100
+        # 2. 优先选择正规的期刊文章或会议文章
+        item_type = item.get("type", "")
+        if item_type in ["journal-article", "proceedings-article"]:
+            score += 50
+        # 3. 严重降权：明确标记为补充材料(component)或数据集的附件
+        elif item_type in ["component", "dataset"]:
+            score -= 200
+        return score
+
+    # 按照质量得分从高到低重新洗牌，确保正经论文排在最前面
+    items.sort(key=get_item_quality_score, reverse=True)
+        
     target_lower = paper_title.lower().strip()
     
     # 策略 1：绝对精确匹配 (如果某篇标题和用户输入一模一样，直接秒选它)
@@ -40,7 +59,7 @@ def get_best_crossref_match(paper_title):
         if target_lower in title or title in target_lower:
             return item
             
-    # 策略 3：如果都不完全匹配，相信 Crossref 的默认相关性，返回第一个结果
+    # 策略 3：如果都不完全匹配，返回清洗后质量得分最高的第一条
     return items[0]
 
 def generate_citation(paper_title, selected_styles, history):
