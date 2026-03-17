@@ -3,7 +3,7 @@ import traceback
 from openai import OpenAI
 from config import SYSTEM_SERPAPI_KEY, DEFAULT_LLM_KEY, DEFAULT_LLM_URL, DEFAULT_LLM_MODEL
 from utils import format_history
-from services.prompts import get_citation_prompt
+from services.prompts import google_get_citation_prompt
 
 def generate_citation(paper_title, selected_styles, history):
     try:
@@ -67,7 +67,7 @@ def generate_citation(paper_title, selected_styles, history):
 
         # 4. 拼接 Prompt 并调用 LLM
         styles_str = ", ".join(selected_styles)
-        prompt = get_citation_prompt(styles_str=styles_str, raw_data_str=raw_data_str)
+        prompt = google_get_citation_prompt(styles_str=styles_str, raw_data_str=raw_data_str)
 
         # 🌟 优化点：增加 timeout=60.0，防止网络拥堵时无限卡死
         client = OpenAI(api_key=DEFAULT_LLM_KEY, base_url=DEFAULT_LLM_URL, timeout=60.0)
