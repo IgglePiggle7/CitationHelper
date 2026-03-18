@@ -24,16 +24,16 @@ with gr.Blocks(theme=theme, title="Academic Citation Assistant | 学术文献助
             <span style="font-size: 1.5rem; color: #4f46e5;">多功能学术文献引用助手</span>
         </h1>
         <p style="color: #64748b; font-size: 1rem;">
-            Google Scholar Citation Fetching & Generation | Word Document Reference Auto-Reordering<br>
-            谷歌学术文献抓取生成 | Word 引用序号自动乱序重排
+            Standard Literature Citation Generation | Word Document Reference Auto-Reordering<br>
+            标准文献引用一键生成 | Word 引用序号自动乱序重排
         </p>
     </div>
     """)
     
     with gr.Tabs():
-        # 标签页 1：文献格式生成器 / Citation Generator
+        # 标签页 1：文献引用生成器 / Citation Generator
         with gr.TabItem("🔍 1. Citation Generator / 引用生成器"):
-            gr.Markdown("Auto-fetch the most accurate metadata from Google Scholar and format it to standard styles. / 输入论文标题，自动从 Google Scholar 抓取最准确的数据并格式化为您需要的标准引用。")
+            gr.Markdown("Enter a paper title to generate multiple standard citation formats. / 输入论文标题，工具将生成您需要的多种标准文献引用格式")
             
             with gr.Row():
                 with gr.Column(scale=1):

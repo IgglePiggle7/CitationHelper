@@ -5,7 +5,7 @@ from config import SYSTEM_SERPAPI_KEY, DEFAULT_LLM_KEY, DEFAULT_LLM_URL, DEFAULT
 from utils import format_history
 from services.prompts import google_get_citation_prompt
 
-def generate_citation(paper_title, selected_styles, history):
+def google_generate_citation(paper_title, selected_styles, history):
     try:
         # 1. 安全初始化
         if history is None:
